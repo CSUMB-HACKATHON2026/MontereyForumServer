@@ -1,80 +1,132 @@
 package com.MCF.backend.model;
 
 import jakarta.persistence.*;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
-/**
- * Represents a city issue reported by a user.
- * Category must be one of: roads, safety, housing, sanitation, noise, other.
- * Status must be one of: open, in_review, resolved.
- *
- * @author MCF Team
- * @version 0.1.0
- */
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "issues")
 public class Issue {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uuid")
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "issue_id")
+    private Long issueId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Profile user;
+    private User user;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    @Column(name = "title", nullable = false, length = 120)
     private String title;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String category;
+    @Column(name = "status", nullable = false, length = 20)
+    private String status = "OPEN";
 
-    @Column(nullable = false)
-    private String status = "open";
+    @Column(name = "location_text", length = 255)
+    private String locationText;
 
-    private String neighborhood;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-    @Column(name = "created_at")
-    private OffsetDateTime createdAt;
+    public Issue() {
+    }
 
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+        if (this.status == null || this.status.isBlank()) {
+            this.status = "OPEN";
+        }
+    }
 
-    public Profile getUser() { return user; }
-    public void setUser(Profile user) { this.user = user; }
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public Long getIssueId() {
+        return issueId;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setIssueId(Long issueId) {
+        this.issueId = issueId;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public User getUser() {
+        return user;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public String getNeighborhood() { return neighborhood; }
-    public void setNeighborhood(String neighborhood) { this.neighborhood = neighborhood; }
+    public Category getCategory() {
+        return category;
+    }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public String getTitle() {
+        return title;
+    }
 
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getLocationText() {
+        return locationText;
+    }
+
+    public void setLocationText(String locationText) {
+        this.locationText = locationText;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

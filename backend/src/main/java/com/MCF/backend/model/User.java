@@ -5,24 +5,22 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comments")
-public class Comment {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
-    private Long commentId;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "issue_id", nullable = false)
-    private Issue issue;
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String username;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
 
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -30,7 +28,7 @@ public class Comment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public Comment() {
+    public User() {
     }
 
     @PrePersist
@@ -45,36 +43,36 @@ public class Comment {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Long getCommentId() {
-        return commentId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setCommentId(Long commentId) {
-        this.commentId = commentId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public Issue getIssue() {
-        return issue;
+    public String getUsername() {
+        return username;
     }
 
-    public void setIssue(Issue issue) {
-        this.issue = issue;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public User getUser() {
-        return user;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getContent() {
-        return content;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -1,7 +1,5 @@
 package com.MCF.backend.controller;
 
-import com.MCF.backend.model.Issue;
-import com.MCF.backend.service.IssueService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
