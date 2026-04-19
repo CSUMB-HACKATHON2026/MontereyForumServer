@@ -27,6 +27,16 @@ public class IssueController {
         return issueService.getAllIssues();
     }
 
+    @GetMapping("/bulletins")
+    public List<IssueResponse> getBulletins() {
+        return issueService.getBulletinIssues();
+    }
+
+    @GetMapping("/announcements")
+    public List<IssueResponse> getAnnouncements() {
+        return issueService.getAnnouncementIssues();
+    }
+
     @GetMapping("/{issueId}")
     public IssueResponse getIssueById(@PathVariable Long issueId) {
         return issueService.getIssueById(issueId);

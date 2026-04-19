@@ -13,9 +13,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
+
+    private static final Pattern EMAIL_PATTERN =
+        Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final Pattern PASSWORD_PATTERN =
+        Pattern.compile("^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{9,}$");
+    private static final String PASSWORD_REQUIREMENTS_MESSAGE =
+        "Password must be at least 9 characters and include 1 uppercase letter, 1 number, and 1 special character.";
+        private static final String DEFAULT_ADMIN_EMAIL = "admin@admin.com";
+        private static final String DEFAULT_ADMIN_USERNAME = "admin";
+        private static final String DEFAULT_ADMIN_PASSWORD = "admin";
 
     private final UserService userService;
     private final JwtTokenService jwtTokenService;
@@ -30,15 +41,21 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(EmailPasswordRegisterRequest request) {
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
+        String email = request.getEmail() == null ? "" : request.getEmail().trim().toLowerCase();
+        String password = request.getPassword() == null ? "" : request.getPassword();
+
+        if (email.isBlank()) {
             throw new AuthException("Email is required.");
         }
-        if (request.getPassword() == null || request.getPassword().length() < 8) {
-            throw new AuthException("Password must be at least 8 characters.");
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new AuthException("Email must be a valid address (example: name@domain.com).");
+        }
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new AuthException(PASSWORD_REQUIREMENTS_MESSAGE);
         }
         User user = userService.registerWithPassword(
-                request.getEmail().trim().toLowerCase(),
-                request.getPassword(),
+                email,
+                password,
                 request.getUsername()
         );
         return buildAuthResponse(user);
@@ -46,12 +63,23 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse login(EmailPasswordLoginRequest request) {
-        if (request.getEmail() == null || request.getPassword() == null) {
+        String email = request.getEmail() == null ? "" : request.getEmail().trim().toLowerCase();
+        String password = request.getPassword() == null ? "" : request.getPassword();
+
+        if (email.isBlank() || password.isBlank()) {
             throw new AuthException("Email and password are required.");
         }
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new AuthException("Email must be a valid address (example: name@domain.com).");
+        }
+
+        if (DEFAULT_ADMIN_EMAIL.equals(email) && DEFAULT_ADMIN_PASSWORD.equals(password)) {
+            userService.ensurePasswordLoginAccount(DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD);
+        }
+
         User user = userService.authenticateEmailPassword(
-                request.getEmail().trim().toLowerCase(),
-                request.getPassword()
+                email,
+                password
         );
         return buildAuthResponse(user);
     }

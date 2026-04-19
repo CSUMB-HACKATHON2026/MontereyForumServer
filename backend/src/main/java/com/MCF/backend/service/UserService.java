@@ -73,6 +73,24 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User ensurePasswordLoginAccount(String email, String preferredUsername, String rawPassword) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> {
+                    User created = new User();
+                    created.setEmail(email);
+                    created.setUsername(resolveUniqueUsername(preferredUsername, email));
+                    return created;
+                });
+
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            user.setUsername(resolveUniqueUsername(preferredUsername, email));
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(rawPassword));
+        return userRepository.save(user);
+    }
+
     @Transactional(readOnly = true)
     public User authenticateEmailPassword(String email, String rawPassword) {
         User user = userRepository.findByEmailIgnoreCase(email)

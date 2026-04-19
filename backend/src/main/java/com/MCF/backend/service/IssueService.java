@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +44,21 @@ public class IssueService {
 
     public List<IssueResponse> getAllIssues() {
         return issueRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<IssueResponse> getBulletinIssues() {
+        return issueRepository.findAll()
+                .stream()
+                .filter(issue -> !Objects.equals(issue.getCategory().getCategoryId(), announcementsCategoryId))
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<IssueResponse> getAnnouncementIssues() {
+        return issueRepository.findByCategory_CategoryId(announcementsCategoryId)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
