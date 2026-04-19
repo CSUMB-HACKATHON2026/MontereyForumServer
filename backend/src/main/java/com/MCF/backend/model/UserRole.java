@@ -22,15 +22,11 @@ public class UserRole {
     @JoinColumn(name = "user_id")
     private Profile user;
 
-    @Column(nullable = false)
-    private String role;
-
     public UserRoleId getId() { return id; }
     public void setId(UserRoleId id) { this.id = id; }
 
     public Profile getUser() { return user; }
     public void setUser(Profile user) { this.user = user; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public String getRole() { return id.getRole(); }
 }
