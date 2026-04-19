@@ -1,109 +1,62 @@
 package com.MCF.backend.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.MCF.backend.dto.request.CreateIssueRequest;
+import com.MCF.backend.dto.request.UpdateIssueRequest;
+import com.MCF.backend.dto.response.IssueResponse;
+import com.MCF.backend.service.IssueService;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-/**
- * Controller for handling city issue endpoints.
- * Provides endpoints for creating, retrieving, updating, and deleting issues.
- *
- * @author MCF Team
- * @version 0.1.0
- */
+import java.util.List;
+
 @RestController
-@RequestMapping("/issues")
+@RequestMapping("/api/issues")
+@CrossOrigin
 public class IssueController {
 
     private final IssueService issueService;
 
-    /**
-     * Constructs an IssueController with the given service.
-     *
-     * @param issueService the service used to manage issues
-     */
     public IssueController(IssueService issueService) {
         this.issueService = issueService;
     }
 
-    /**
-     * Retrieves all issues.
-     *
-     * @return a list of all issues
-     */
     @GetMapping
-    public ResponseEntity<List<Issue>> getAll() {
-        return ResponseEntity.ok(issueService.getAll());
+    public List<IssueResponse> getAllIssues() {
+        return issueService.getAllIssues();
     }
 
-    /**
-     * Retrieves an issue by its ID.
-     *
-     * @param id the ID of the issue to retrieve
-     * @return the issue with the given ID
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<Issue> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(issueService.getById(id));
+    @GetMapping("/{issueId}")
+    public IssueResponse getIssueById(@PathVariable Long issueId) {
+        return issueService.getIssueById(issueId);
     }
 
-    /**
-     * Creates a new issue for the authenticated user.
-     *
-     * @param issue the issue to create
-     * @param userId the ID of the authenticated user from the JWT
-     * @return the created issue with a 201 status
-     */
+    @GetMapping("/category/{categoryId}")
+    public List<IssueResponse> getIssuesByCategory(@PathVariable Long categoryId) {
+        return issueService.getIssuesByCategory(categoryId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<IssueResponse> getIssuesByUser(@PathVariable Long userId) {
+        return issueService.getIssuesByUser(userId);
+    }
+
+    @GetMapping("/status/{status}")
+    public List<IssueResponse> getIssuesByStatus(@PathVariable String status) {
+        return issueService.getIssuesByStatus(status);
+    }
+
     @PostMapping
-    public ResponseEntity<Issue> create(@RequestBody Issue issue,
-                                        @RequestAttribute("userId") UUID userId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(issueService.create(issue, userId));
+    public IssueResponse createIssue(@RequestBody CreateIssueRequest request) {
+        return issueService.createIssue(request);
     }
 
-    /**
-     * Partially updates an issue owned by the authenticated user.
-     *
-     * @param id the ID of the issue to update
-     * @param updates the fields to update
-     * @param userId the ID of the authenticated user from the JWT
-     * @return the updated issue
-     */
-    @PatchMapping("/{id}")
-    public ResponseEntity<Issue> patch(@PathVariable UUID id,
-                                       @RequestBody Issue updates,
-                                       @RequestAttribute("userId") UUID userId) {
-        return ResponseEntity.ok(issueService.patch(id, updates, userId));
+    @PutMapping("/{issueId}")
+    public IssueResponse updateIssue(@PathVariable Long issueId,
+                                     @RequestBody UpdateIssueRequest request) {
+        return issueService.updateIssue(issueId, request);
     }
 
-    /**
-     * Updates the status of an issue. Admin only.
-     *
-     * @param id the ID of the issue to update
-     * @param body a map containing the new status
-     * @return the updated issue
-     */
-    @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Issue> updateStatus(@PathVariable UUID id,
-                                              @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(issueService.updateStatus(id, body.get("status")));
-    }
-
-    /**
-     * Deletes an issue owned by the authenticated user.
-     *
-     * @param id the ID of the issue to delete
-     * @param userId the ID of the authenticated user from the JWT
-     * @return a 204 no content response
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id,
-                                       @RequestAttribute("userId") UUID userId) {
-        issueService.delete(id, userId);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{issueId}")
+    public void deleteIssue(@PathVariable Long issueId) {
+        issueService.deleteIssue(issueId);
     }
 }
