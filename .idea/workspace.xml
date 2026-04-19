@@ -4,31 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed7bd280-0392-4d03-9ea0-9676b82560b1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Category.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/IssueImage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/CategoryRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/IssueImageRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/UserRepository.java" afterDir="false" />
+    <list default="true" id="ed7bd280-0392-4d03-9ea0-9676b82560b1" name="Changes" comment="added Request, Service and Responese">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/controller/ForumController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/controller/ForumController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/controller/IssueController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/controller/IssueController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/controller/ResourceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/controller/ResourceController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Comment.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Comment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Issue.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Issue.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Profile.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/Resource.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/UserRole.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/model/UserRoleId.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/CommentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/CommentRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/IssueRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/IssueRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/ProfileRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/ResourceRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/repository/UserRoleRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/service/ForumService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/service/IssueService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/MCF/backend/service/ResourceService.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -161,9 +142,31 @@
       <updated>1776556832906</updated>
       <workItem from="1776556834768" duration="31000" />
     </task>
+    <task id="LOCAL-00001" summary="changed DB">
+      <option name="closed" value="true" />
+      <created>1776577673357</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1776577673357</updated>
+    </task>
+    <task id="LOCAL-00002" summary="added Request, Service and Responese">
+      <option name="closed" value="true" />
+      <created>1776578680832</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1776578680832</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="changed DB" />
+    <MESSAGE value="added Request, Service and Responese" />
+    <option name="LAST_COMMIT_MESSAGE" value="added Request, Service and Responese" />
   </component>
 </project>

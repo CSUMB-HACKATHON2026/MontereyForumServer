@@ -1,5 +1,6 @@
 package com.MCF.backend.repository;
 
+import com.MCF.backend.model.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
