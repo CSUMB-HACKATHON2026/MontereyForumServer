@@ -21,9 +21,9 @@ public class AuthService {
     private static final Pattern EMAIL_PATTERN =
         Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final Pattern PASSWORD_PATTERN =
-        Pattern.compile("^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{9,}$");
+            Pattern.compile("^.{8,}$");
     private static final String PASSWORD_REQUIREMENTS_MESSAGE =
-        "Password must be at least 9 characters and include 1 uppercase letter, 1 number, and 1 special character.";
+            "Password must be at least 8 characters.";
         private static final String DEFAULT_ADMIN_EMAIL = "admin@admin.com";
         private static final String DEFAULT_ADMIN_USERNAME = "admin";
         private static final String DEFAULT_ADMIN_PASSWORD = "admin";

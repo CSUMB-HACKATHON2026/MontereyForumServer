@@ -21,6 +21,7 @@ public class DefaultContentSeeder implements CommandLineRunner {
     private static final String LEGACY_COMMUNITY_THREAD_TITLE = "Community check-in thread";
     private static final String EVENT_STYLE_COMMUNITY_TITLE = "Community check-in event";
     private static final String EVENT_STYLE_COMMUNITY_DESCRIPTION = "Share your neighborhood event plans, meetup details, and community updates.";
+    private static final String DEFAULT_ISSUE_STATUS = "OPEN";
     private static final String DEFAULT_ADMIN_EMAIL = "admin@admin.com";
     private static final String DEFAULT_ADMIN_USERNAME = "admin";
     private static final String DEFAULT_ADMIN_PASSWORD = "admin";
@@ -59,35 +60,150 @@ public class DefaultContentSeeder implements CommandLineRunner {
 
         Category announcements = findOrCreateCategory("Announcements");
         Category community = findOrCreateCategory("Community");
-        findOrCreateCategory("Guides");
+        Category guides = findOrCreateCategory("Guides");
         findOrCreateCategory("Neighborhood");
 
         migrateLegacyCommunityThreadTitle(community);
-
-        if (issueRepository.count() > 0) {
-            return;
-        }
 
         User systemUser = findOrCreateSystemUser();
 
         Category announcementsCategory = categoryRepository.findById(announcementsCategoryId).orElse(announcements);
 
-        Issue welcomeAnnouncement = new Issue();
-        welcomeAnnouncement.setUser(systemUser);
-        welcomeAnnouncement.setCategory(announcementsCategory);
-        welcomeAnnouncement.setTitle("Welcome to Monterey Forum");
-        welcomeAnnouncement.setDescription("Welcome! Use this space for official updates and community news.");
-        welcomeAnnouncement.setStatus("OPEN");
-        issueRepository.save(welcomeAnnouncement);
-
-        Issue sampleBulletin = new Issue();
-        sampleBulletin.setUser(systemUser);
-        sampleBulletin.setCategory(community);
-        sampleBulletin.setTitle(EVENT_STYLE_COMMUNITY_TITLE);
-        sampleBulletin.setDescription(EVENT_STYLE_COMMUNITY_DESCRIPTION);
-        sampleBulletin.setStatus("OPEN");
-        issueRepository.save(sampleBulletin);
+        seedAnnouncements(systemUser, announcementsCategory);
+        seedCommunityBulletins(systemUser, community);
+        seedGuides(systemUser, guides);
     }
+
+        private void seedAnnouncements(User systemUser, Category announcementsCategory) {
+        createIssueIfMissing(
+            systemUser,
+            announcementsCategory,
+            "Welcome to Monterey Forum",
+            "Welcome! Use this space for official updates and community news.",
+            null
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            announcementsCategory,
+            "Farmers Market Hours Extended Through Summer",
+            "Good news: the Old Monterey Marketplace will remain open until 4:00 PM on Saturdays through September. " +
+                "Bring reusable bags and support local growers.",
+            "Old Monterey"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            announcementsCategory,
+            "Neighborhood Preparedness Meeting - May 2",
+            "Join the city emergency preparedness team on May 2 at 6:30 PM at the Seaside Community Center. " +
+                "We will cover evacuation routes, alerts, and household readiness checklists.",
+            "Seaside Community Center"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            announcementsCategory,
+            "Roadwork Notice: Del Monte Ave Lane Closures",
+            "Public works crews will repair storm drains on Del Monte Ave next week. " +
+                "Expect single-lane closures between 9:00 AM and 3:00 PM Monday through Thursday.",
+            "Del Monte Ave"
+        );
+        }
+
+        private void seedCommunityBulletins(User systemUser, Category communityCategory) {
+        createIssueIfMissing(
+            systemUser,
+            communityCategory,
+            EVENT_STYLE_COMMUNITY_TITLE,
+            EVENT_STYLE_COMMUNITY_DESCRIPTION,
+            null
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            communityCategory,
+            "Weekend Beach Cleanup at Del Monte",
+            "We are meeting this Saturday at 9:00 AM near the volleyball courts for a community cleanup. " +
+                "Gloves and bags provided. Families and students welcome.",
+            "Del Monte Beach"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            communityCategory,
+            "Downtown Art Walk and Live Music Night",
+            "Local artists and student musicians will be featured Friday from 5:30 PM to 8:30 PM. " +
+                "Shops stay open late and food trucks will line Alvarado Street.",
+            "Alvarado Street"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            communityCategory,
+            "Family Board Game Meetup",
+            "Bring your favorite board game to the Marina branch library this Sunday at 2:00 PM. " +
+                "New players are encouraged and light snacks will be available.",
+            "Marina Library"
+        );
+        }
+
+        private void seedGuides(User systemUser, Category guidesCategory) {
+        createIssueIfMissing(
+            systemUser,
+            guidesCategory,
+            "How to Report City Service Requests Quickly",
+            "Need a pothole repaired, streetlight fixed, or graffiti removed? " +
+                "Use the city service portal, include a clear location pin, and attach one photo for fastest routing.",
+            "Monterey"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            guidesCategory,
+            "Beginner's Guide to Monterey Transit",
+            "This tutorial explains MST routes, day passes, and mobile ticketing. " +
+                "If you are commuting to CSUMB or downtown, start with routes 1, 20, and 23.",
+            "Monterey Peninsula"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            guidesCategory,
+            "Emergency Kit Checklist for Coastal Weather",
+            "Build a 72-hour kit with water, shelf-stable food, medications, batteries, and printed emergency contacts. " +
+                "Store one kit at home and one in your car.",
+            "Countywide"
+        );
+
+        createIssueIfMissing(
+            systemUser,
+            guidesCategory,
+            "New Resident Starter Guide",
+            "Just moved here? This post walks through utility setup, library cards, parking permits, and local volunteer groups " +
+                "to help you settle in quickly.",
+            "Monterey County"
+        );
+        }
+
+        private void createIssueIfMissing(User user, Category category, String title, String description, String locationText) {
+        boolean exists = issueRepository.findByCategory_CategoryId(category.getCategoryId())
+            .stream()
+            .anyMatch(issue -> issue.getTitle() != null && issue.getTitle().trim().equalsIgnoreCase(title));
+
+        if (exists) {
+            return;
+        }
+
+        Issue issue = new Issue();
+        issue.setUser(user);
+        issue.setCategory(category);
+        issue.setTitle(title);
+        issue.setDescription(description);
+        issue.setStatus(DEFAULT_ISSUE_STATUS);
+        issue.setLocationText(locationText);
+        issueRepository.save(issue);
+        }
 
     private void migrateLegacyCommunityThreadTitle(Category communityCategory) {
         List<Issue> communityIssues = issueRepository.findByCategory_CategoryId(communityCategory.getCategoryId());
