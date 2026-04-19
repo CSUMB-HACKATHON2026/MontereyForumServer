@@ -9,7 +9,11 @@ import com.MCF.backend.model.User;
 import com.MCF.backend.repository.CommentRepository;
 import com.MCF.backend.repository.IssueRepository;
 import com.MCF.backend.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,15 +46,33 @@ public class CommentService {
         Issue issue = issueRepository.findById(issueId)
                 .orElseThrow(() -> new RuntimeException("Issue not found"));
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Long userId = requireAuthenticatedUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        String content = request.getContent();
+        if (content == null || content.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment content is required");
+        }
 
         Comment comment = new Comment();
         comment.setIssue(issue);
         comment.setUser(user);
-        comment.setContent(request.getContent());
+        comment.setContent(content.trim());
 
         return new CommentResponse(commentRepository.save(comment));
+    }
+
+    private static Long requireAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+        try {
+            return Long.parseLong(auth.getPrincipal().toString());
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
     }
 
     public CommentResponse updateComment(Long commentId, UpdateCommentRequest request) {

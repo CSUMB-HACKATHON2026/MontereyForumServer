@@ -2,7 +2,6 @@ package com.MCF.backend.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,30 +12,26 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 /**
- * JWT authentication filter that validates Supabase JWT tokens on every request.
- * Extracts the user ID and role from the token and sets the authentication context.
- *
- * @author MCF Team
- * @version 0.1.0
+ * Validates HS256 JWTs issued by this application (login / OAuth / refresh).
  */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Value("${supabase.jwt.secret}")
-    private String jwtSecret;
+    private final SecretKey signingKey;
 
-    /**
-     * Filters incoming requests and validates the JWT token.
-     *
-     * @param request the incoming HTTP request
-     * @param response the HTTP response
-     * @param chain the filter chain
-     */
+    public JwtAuthFilter(@Value("${app.auth.jwt.secret}") String jwtSecret) {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("app.auth.jwt.secret must be set");
+        }
+        this.signingKey = JwtSigningKey.fromSecret(jwtSecret);
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -54,20 +49,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+                    .setSigningKey(signingKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
-            String userId = claims.getSubject();
+            String typ = claims.get("typ", String.class);
+            if (!"access".equals(typ)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            String userIdStr = claims.getSubject();
+            long userId = Long.parseLong(userIdStr);
             String role = claims.get("role", String.class);
+            if (role == null || role.isBlank()) {
+                role = "user";
+            }
 
-            if (role == null) role = "user";
-
-            request.setAttribute("userId", UUID.fromString(userId));
+            request.setAttribute("userId", userId);
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    userId, null,
+                    userIdStr,
+                    null,
                     List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
             );
 

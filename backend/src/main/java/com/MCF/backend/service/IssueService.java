@@ -11,6 +11,7 @@ import com.MCF.backend.repository.CategoryRepository;
 import com.MCF.backend.repository.IssueImageRepository;
 import com.MCF.backend.repository.IssueRepository;
 import com.MCF.backend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,9 @@ public class IssueService {
     private final IssueImageRepository issueImageRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+
+    @Value("${app.announcements.category-id:1}")
+    private long announcementsCategoryId;
 
     public IssueService(
             IssueRepository issueRepository,
@@ -72,8 +76,8 @@ public class IssueService {
     }
 
     @Transactional
-    public IssueResponse createIssue(CreateIssueRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public IssueResponse createIssueForUser(long userId, CreateIssueRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Category category = categoryRepository.findById(request.getCategoryId())
@@ -89,17 +93,48 @@ public class IssueService {
 
         Issue savedIssue = issueRepository.save(issue);
 
-        if (request.getImageUrls() == null || request.getImageUrls().isEmpty()) {
-            throw new RuntimeException("At least one image is required");
+        if (request.getImageUrls() != null) {
+            for (String imageUrl : request.getImageUrls()) {
+                if (imageUrl == null || imageUrl.isBlank()) {
+                    continue;
+                }
+                String trimmed = imageUrl.trim();
+                if (trimmed.length() > 255) {
+                    trimmed = trimmed.substring(0, 255);
+                }
+                IssueImage image = new IssueImage();
+                image.setIssue(savedIssue);
+                image.setImageUrl(trimmed);
+                issueImageRepository.save(image);
+            }
         }
 
-        for (String imageUrl : request.getImageUrls()) {
-            IssueImage image = new IssueImage();
-            image.setIssue(savedIssue);
-            image.setImageUrl(imageUrl);
-            issueImageRepository.save(image);
-        }
+        return toResponse(savedIssue);
+    }
 
+    @Transactional
+    public IssueResponse createAnnouncementIssue(long authorUserId, String title, String description) {
+        if (title == null || title.isBlank()) {
+            throw new RuntimeException("Title is required");
+        }
+        if (description == null || description.isBlank()) {
+            throw new RuntimeException("Description is required");
+        }
+        User user = userRepository.findById(authorUserId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Category category = categoryRepository.findById(announcementsCategoryId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Announcement category not found. Set app.announcements.category-id in application.properties."));
+
+        Issue issue = new Issue();
+        issue.setUser(user);
+        issue.setCategory(category);
+        issue.setTitle(title.trim());
+        issue.setDescription(description.trim());
+        issue.setStatus("OPEN");
+        issue.setLocationText(null);
+
+        Issue savedIssue = issueRepository.save(issue);
         return toResponse(savedIssue);
     }
 

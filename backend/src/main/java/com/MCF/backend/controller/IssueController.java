@@ -4,7 +4,10 @@ import com.MCF.backend.dto.request.CreateIssueRequest;
 import com.MCF.backend.dto.request.UpdateIssueRequest;
 import com.MCF.backend.dto.response.IssueResponse;
 import com.MCF.backend.service.IssueService;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -45,8 +48,12 @@ public class IssueController {
     }
 
     @PostMapping
-    public IssueResponse createIssue(@RequestBody CreateIssueRequest request) {
-        return issueService.createIssue(request);
+    public IssueResponse createIssue(Authentication authentication, @RequestBody CreateIssueRequest request) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in required to create an issue.");
+        }
+        long userId = Long.parseLong(authentication.getPrincipal().toString());
+        return issueService.createIssueForUser(userId, request);
     }
 
     @PutMapping("/{issueId}")
