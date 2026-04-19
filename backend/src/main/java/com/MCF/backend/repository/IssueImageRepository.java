@@ -9,5 +9,7 @@ public interface IssueImageRepository extends JpaRepository<IssueImage, Long> {
 
     List<IssueImage> findByIssue_IssueId(Long issueId);
 
+    List<IssueImage> findByIssue_IssueIdIn(List<Long> issueIds);
+
     void deleteByIssue_IssueId(Long issueId);
 }

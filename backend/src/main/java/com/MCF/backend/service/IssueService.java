@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -43,25 +44,19 @@ public class IssueService {
     }
 
     public List<IssueResponse> getAllIssues() {
-        return issueRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return toResponses(issueRepository.findAll());
     }
 
     public List<IssueResponse> getBulletinIssues() {
-        return issueRepository.findAll()
+        List<Issue> bulletins = issueRepository.findAll()
                 .stream()
                 .filter(issue -> !Objects.equals(issue.getCategory().getCategoryId(), announcementsCategoryId))
-                .map(this::toResponse)
                 .collect(Collectors.toList());
+        return toResponses(bulletins);
     }
 
     public List<IssueResponse> getAnnouncementIssues() {
-        return issueRepository.findByCategory_CategoryId(announcementsCategoryId)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return toResponses(issueRepository.findByCategory_CategoryId(announcementsCategoryId));
     }
 
     public IssueResponse getIssueById(Long issueId) {
@@ -71,24 +66,15 @@ public class IssueService {
     }
 
     public List<IssueResponse> getIssuesByCategory(Long categoryId) {
-        return issueRepository.findByCategory_CategoryId(categoryId)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return toResponses(issueRepository.findByCategory_CategoryId(categoryId));
     }
 
     public List<IssueResponse> getIssuesByUser(Long userId) {
-        return issueRepository.findByUser_UserId(userId)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return toResponses(issueRepository.findByUser_UserId(userId));
     }
 
     public List<IssueResponse> getIssuesByStatus(String status) {
-        return issueRepository.findByStatus(status)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return toResponses(issueRepository.findByStatus(status));
     }
 
     @Transactional
@@ -206,5 +192,23 @@ public class IssueService {
     private IssueResponse toResponse(Issue issue) {
         List<IssueImage> images = issueImageRepository.findByIssue_IssueId(issue.getIssueId());
         return new IssueResponse(issue, images);
+    }
+
+    private List<IssueResponse> toResponses(List<Issue> issues) {
+        if (issues.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> issueIds = issues.stream()
+                .map(Issue::getIssueId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<IssueImage>> imagesByIssueId = issueImageRepository.findByIssue_IssueIdIn(issueIds)
+                .stream()
+                .collect(Collectors.groupingBy(image -> image.getIssue().getIssueId()));
+
+        return issues.stream()
+                .map(issue -> new IssueResponse(issue, imagesByIssueId.getOrDefault(issue.getIssueId(), List.of())))
+                .collect(Collectors.toList());
     }
 }
